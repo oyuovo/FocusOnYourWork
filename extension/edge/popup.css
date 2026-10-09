@@ -1,0 +1,11 @@
+:root { color-scheme: light; font-family: "Microsoft YaHei UI", sans-serif; color: #29483c; background: #f5f4ee; }
+body { margin: 0; width: 310px; }
+main { padding: 24px; }
+.eyebrow { font-size: 10px; letter-spacing: .18em; color: #758675; }
+h1 { font-size: 20px; line-height: 1.5; margin: 15px 0 10px; }
+p { font-size: 13px; line-height: 1.8; color: #637669; }
+button { border: 0; width: 100%; padding: 13px; background: #294d40; color: #fff; border-radius: 10px; font: inherit; cursor: pointer; margin: 10px 0 2px; }
+button:disabled { opacity: .5; cursor: wait; }
+button:focus-visible { outline: 3px solid #b69d72; outline-offset: 3px; }
+small { font-size: 11px; color: #758675; }
+#status { min-height: 46px; }
