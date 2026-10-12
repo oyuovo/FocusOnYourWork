@@ -23,7 +23,7 @@ function connect() {
     const error = chrome.runtime.lastError;
     if (port !== opened) return;
     port = null; tracking = false;
-    const lastReply = { Ok: false, Message: error ? '连接不可用。请确认已运行注册脚本，并打开专注岛。' : '连接已断开，请重新选择页面。' };
+    const lastReply = { Ok: false, Message: error ? '连接不可用。请确认已运行注册脚本，并打开专注宗门。' : '连接已断开，请重新选择页面。' };
     const resolve = pending; pending = null;
     if (resolve) resolve(lastReply);
     // User opens the popup to reconnect; do not respawn a missing host in a loop.
@@ -85,7 +85,7 @@ chrome.runtime.onMessage.addListener((message, _sender, reply) => {
       if (!page.Url) return { Ok: false, Message: '请打开普通 HTTP/HTTPS 网页后再选择。' };
       const result = await exchange(page);
       void pulse();
-      return result.Ok ? { ...result, Message: '页面已选好。回到专注岛开始计时。' } : result;
+      return result.Ok ? { ...result, Message: '页面已选好。回到专注宗门开始计时。' } : result;
     })().then(reply).catch(() => reply({ Ok: false, Message: '无法读取当前标签，请稍后重试。' }));
     return true;
   }

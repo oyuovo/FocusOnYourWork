@@ -1,6 +1,6 @@
 using System;
 
-namespace FocusIsland.Core
+namespace FocusOnYourWork.Core
 {
     // Receives monotonic elapsed intervals. Neither wall-clock jumps nor missed callbacks earn time.
     public sealed class SessionEngine

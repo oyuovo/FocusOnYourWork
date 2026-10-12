@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace FocusIsland.Desktop
+namespace FocusOnYourWork.Desktop
 {
     public sealed class WindowTarget
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FocusIsland.Core
+namespace FocusOnYourWork.Core
 {
     public enum Presence { Unknown, Allowed, Away }
 
@@ -31,31 +31,22 @@ namespace FocusIsland.Core
         public bool Recovered { get; set; }
     }
 
-    public sealed class Building
-    {
-        public int Plot { get; set; }
-        public string Kind { get; set; }
-        public string Color { get; set; }
-    }
-
     public sealed class SaveData
     {
         public int Version { get; set; }
-        public string IslandName { get; set; }
-        public string Theme { get; set; }
+        public string SectName { get; set; }
         public long WalletUnits { get; set; }
         public long TotalEffectiveMs { get; set; }
-        public List<Building> Buildings { get; set; }
         public List<SessionRecord> History { get; set; }
         public SessionData Pending { get; set; }
+        public SectData Sect { get; set; }
 
         public SaveData()
         {
-            Version = 1;
-            IslandName = "我的专注岛";
-            Theme = "sage";
-            Buildings = new List<Building>();
+            Version = 3;
+            SectName = "我的宗门";
             History = new List<SessionRecord>();
+            Sect = new SectData();
         }
     }
 
@@ -64,21 +55,6 @@ namespace FocusIsland.Core
         public const long UnitsPerMaterial = 60000;
         public const long GraceMs = 10000;
         public const long MaxSampleMs = 2500;
-        public const int PlotCount = 9;
-        public static long Price(string kind)
-        {
-            switch (kind)
-            {
-                case "tree": return 5 * UnitsPerMaterial;
-                case "tent": return 15 * UnitsPerMaterial;
-                case "cottage": return 25 * UnitsPerMaterial;
-                default: throw new ArgumentException("未知建筑类型。");
-            }
-        }
-        public static string Name(string kind)
-        {
-            return kind == "tree" ? "一棵树" : kind == "tent" ? "露营地" : "海边小屋";
-        }
         public static string Materials(long units) { return (units / (decimal)UnitsPerMaterial).ToString("0.00"); }
     }
 }

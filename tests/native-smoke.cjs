@@ -2,7 +2,7 @@
 const { spawn } = require('node:child_process');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const exe = path.resolve(__dirname, '../artifacts/app/FocusIsland.NativeHost.exe');
+const exe = path.resolve(__dirname, '../artifacts/app/FocusOnYourWork.NativeHost.exe');
 const child = spawn(exe, [], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
 let buffer = Buffer.alloc(0);
 let waiting;

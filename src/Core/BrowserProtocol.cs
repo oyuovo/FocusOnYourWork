@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace FocusIsland.Core
+namespace FocusOnYourWork.Core
 {
     public sealed class BrowserMessage
     {

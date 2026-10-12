@@ -1,4 +1,4 @@
-param([ValidateRange(10,3600)][int]$Seconds = 600, [ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$Label = 'background', [string]$OutputDirectory)
+﻿param([ValidateRange(10,3600)][int]$Seconds = 600, [ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$Label = 'background', [string]$OutputDirectory, [int[]]$ProcessIds)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 if (!$OutputDirectory) { $OutputDirectory = Join-Path $root 'artifacts\performance' }
@@ -8,8 +8,11 @@ $previousCpu = @{}
 $watch = [System.Diagnostics.Stopwatch]::StartNew()
 $lastSeconds = 0.0
 while ($watch.Elapsed.TotalSeconds -lt $Seconds) {
-    $processes = @(Get-Process -Name 'FocusIsland','FocusIsland.NativeHost' -ErrorAction SilentlyContinue)
-    if (!$processes) { throw 'No FocusIsland app/host processes are running in this Windows session.' }
+    $processes = if ($ProcessIds) { @(Get-Process -Id $ProcessIds -ErrorAction SilentlyContinue) } else { @(Get-Process -Name 'FocusOnYourWork','FocusOnYourWork.NativeHost' -ErrorAction SilentlyContinue) }
+    if (!$processes) {
+        if ($ProcessIds -and $samples.Count -gt 0) { break }
+        throw 'No FocusOnYourWork app/host processes are running in this Windows session.'
+    }
     $cpuDelta = 0.0
     $workingSet = 0L
     $committed = 0L
@@ -26,7 +29,7 @@ while ($watch.Elapsed.TotalSeconds -lt $Seconds) {
     $privateWorking = $null
     try {
         $ids = @($processes.Id)
-        $counters = Get-CimInstance -ClassName Win32_PerfFormattedData_PerfProc_Process -Filter "Name LIKE 'FocusIsland%'"
+        $counters = Get-CimInstance -ClassName Win32_PerfFormattedData_PerfProc_Process -Filter "Name LIKE 'FocusOnYourWork%'"
         $matched = @($counters | Where-Object { $ids -contains [int]$_.IDProcess })
         if ($matched.Count -eq $ids.Count) { $privateWorking = ($matched | Measure-Object -Property WorkingSetPrivate -Sum).Sum }
     } catch { $privateWorking = $null }

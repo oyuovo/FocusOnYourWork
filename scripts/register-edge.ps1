@@ -1,12 +1,14 @@
-param([Parameter(Mandatory=$true)][ValidatePattern('^[a-p]{32}$')][string]$ExtensionId)
+﻿param([Parameter(Mandatory=$true)][ValidatePattern('^[a-p]{32}$')][string]$ExtensionId)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$hostExe = Join-Path $root 'artifacts\app\FocusIsland.NativeHost.exe'
+$hostExe = Join-Path $root 'FocusOnYourWork.NativeHost.exe'
+if (!(Test-Path -LiteralPath $hostExe)) { $hostExe = Join-Path $root 'dist\FocusOnYourWork\FocusOnYourWork.NativeHost.exe' }
+if (!(Test-Path -LiteralPath $hostExe)) { $hostExe = Join-Path $root 'artifacts\app\FocusOnYourWork.NativeHost.exe' }
 if (!(Test-Path -LiteralPath $hostExe)) { throw 'Build the app first: .\scripts\build.ps1' }
-$manifestPath = Join-Path $root 'artifacts\app\native-host.json'
+$manifestPath = Join-Path (Split-Path -Parent $hostExe) 'native-host.json'
 $manifest = @{
     name = 'cn.focusisland.desktop'
-    description = 'Focus Island local page companion'
+    description = 'FocusOnYourWork local page companion'
     path = [System.IO.Path]::GetFullPath($hostExe)
     type = 'stdio'
     allowed_origins = @("chrome-extension://$ExtensionId/")

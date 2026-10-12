@@ -1,10 +1,10 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $key = 'HKCU:\Software\Microsoft\Edge\NativeMessagingHosts\cn.focusisland.desktop'
 if (Test-Path -LiteralPath $key) {
-    $expected = [System.IO.Path]::GetFullPath((Join-Path $root 'artifacts\app\native-host.json'))
+    $expected = @('native-host.json','artifacts\app\native-host.json','dist\FocusOnYourWork\native-host.json') | ForEach-Object { [IO.Path]::GetFullPath((Join-Path $root $_)) }
     $actual = (Get-Item -LiteralPath $key).GetValue('')
-    if ($actual -ne $expected) { throw 'Registration points to another installation; it was not removed.' }
+    if ($actual -notin $expected) { throw 'Registration points to another installation; it was not removed.' }
     Remove-Item -LiteralPath $key
 }
-Write-Host 'This installation is unregistered. Your island save has been kept.'
+Write-Host 'This installation is unregistered. Your focus and cultivation progress has been kept.'

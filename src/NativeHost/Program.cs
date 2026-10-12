@@ -4,7 +4,7 @@ using System.IO.Pipes;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
-using FocusIsland.Core;
+using FocusOnYourWork.Core;
 
 internal static class NativeHostProgram
 {
@@ -37,7 +37,7 @@ internal static class NativeHostProgram
                 catch (Exception ex)
                 {
                     if (!(ex is TimeoutException || ex is IOException || ex is ArgumentException || ex is AggregateException)) throw;
-                    reply = serializer.Serialize(new BrowserReply { Message = "请先打开专注岛桌面客户端。" });
+                    reply = serializer.Serialize(new BrowserReply { Message = "请先打开专注宗门桌面客户端。" });
                 }
                 Framing.Write(output, reply ?? "{\"Ok\":false}");
             }

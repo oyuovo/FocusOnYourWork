@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace FocusIsland.Core
+namespace FocusOnYourWork.Core
 {
     public static class Framing
     {

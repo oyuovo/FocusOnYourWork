@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using FocusIsland.Core;
+using FocusOnYourWork.Core;
 
-internal static class CoreTests
+internal static partial class CoreTests
 {
     private static int passed;
     private static int failed;
@@ -35,7 +35,7 @@ internal static class CoreTests
 
     public static int Main(string[] args)
     {
-        testDir = args.Length > 0 ? args[0] : Path.Combine(Path.GetTempPath(), "FocusIsland.Tests");
+        testDir = args.Length > 0 ? args[0] : Path.Combine(Path.GetTempPath(), "FocusOnYourWork.Tests");
         Test("allowed endpoints earn exact elapsed time", delegate {
             var s = Session(false); s.Tick(0, Presence.Allowed); Run(s, 1500, Presence.Allowed);
             Check(s.Data.EffectiveMs == 1500, "timing mismatch");
@@ -108,25 +108,6 @@ internal static class CoreTests
             Throws<ArgumentException>(delegate { new SessionEngine(" ", 25, false); });
             Throws<ArgumentException>(delegate { new SessionEngine("task", 0, false); });
         });
-        Test("build charges exact price and preserves work history", delegate {
-            var save = new SaveData { WalletUnits = 600000, TotalEffectiveMs = 600000 };
-            Game.Build(save, 0, "tree", "sage"); Check(save.WalletUnits == 300000 && save.TotalEffectiveMs == 600000, "bad debit");
-        });
-        Test("insufficient funds and occupied plot never debit", delegate {
-            var save = new SaveData(); Throws<InvalidOperationException>(delegate { Game.Build(save, 0, "tree", "sage"); });
-            save.WalletUnits = 600000; Game.Build(save, 0, "tree", "sage");
-            Throws<InvalidOperationException>(delegate { Game.Build(save, 0, "tent", "sage"); });
-            Check(save.WalletUnits == 300000, "failed action debited");
-        });
-        Test("move is free and requires empty valid plot", delegate {
-            var save = new SaveData { WalletUnits = 300000 }; Game.Build(save, 0, "tree", "sage"); Game.Move(save, 0, 8);
-            Check(save.Buildings[0].Plot == 8 && save.WalletUnits == 0, "move mismatch");
-            Throws<ArgumentException>(delegate { Game.Move(save, 8, 9); });
-        });
-        Test("construction is unavailable during a session", delegate {
-            var save = new SaveData { Pending = Session(false).Data, WalletUnits = 300000 };
-            Throws<InvalidOperationException>(delegate { Game.Build(save, 0, "tree", "sage"); });
-        });
         Test("save roundtrip retains sub-minute precision", delegate {
             var store = Store(); var save = new SaveData { WalletUnits = 12500, Pending = Session(true).Data };
             store.Save(save); var loaded = store.Load(); Check(loaded.WalletUnits == 12500 && loaded.Pending.Id == save.Pending.Id, "roundtrip");
@@ -189,28 +170,21 @@ internal static class CoreTests
             var b = new BrowserTracker(); b.Select(Page("https://example.com/", 2, true), 0);
             Check(b.Evaluate(60000, false) == Presence.Away, "known departure was hidden");
         });
-        Test("valid but incomplete JSON must not reset an island", delegate {
+        Test("valid but incomplete JSON must not reset progress", delegate {
             Throws<InvalidOperationException>(delegate { SaveStore.Parse("{}"); });
             Throws<InvalidOperationException>(delegate { SaveStore.Parse("{\"Version\":1}"); });
         });
-        Test("failed purchase persistence never mutates live funds or buildings", delegate {
-            var save = new SaveData { WalletUnits = 600000 };
-            Throws<IOException>(delegate {
-                SaveStore.Update(save, delegate(SaveData copy) { Game.Build(copy, 0, "tree", "sage"); }, delegate { throw new IOException("disk full"); });
-            });
-            Check(save.WalletUnits == 600000 && save.Buildings.Count == 0, "failed save spent funds");
+        Test("successful rename commits both disk and live state", delegate {
+            var save = new SaveData(); var store = Store();
+            SaveStore.Update(save, delegate(SaveData copy) { copy.SectName = "云隐宗"; }, store.Save);
+            Check(save.SectName == "云隐宗" && store.Load().SectName == "云隐宗", "commit incomplete");
         });
-        Test("successful island change commits both disk and live state", delegate {
-            var save = new SaveData { WalletUnits = 600000 }; var store = Store();
-            SaveStore.Update(save, delegate(SaveData copy) { Game.Build(copy, 0, "tree", "clay"); }, store.Save);
-            Check(save.WalletUnits == 300000 && store.Load().Buildings[0].Color == "clay", "commit incomplete");
-        });
-        Test("failed cosmetic save preserves original appearance", delegate {
-            var save = new SaveData { WalletUnits = 300000 }; Game.Build(save, 0, "tree", "sage");
+        Test("failed rename preserves original name", delegate {
+            var save = new SaveData();
             Throws<IOException>(delegate {
-                SaveStore.Update(save, delegate(SaveData copy) { copy.Buildings[0].Color = "clay"; }, delegate { throw new IOException(); });
+                SaveStore.Update(save, delegate(SaveData copy) { copy.SectName = "云隐宗"; }, delegate { throw new IOException(); });
             });
-            Check(save.Buildings[0].Color == "sage", "appearance changed despite failure");
+            Check(save.SectName == "我的宗门", "name changed despite failure");
         });
         Test("native frame handles Unicode byte lengths and consecutive messages", delegate {
             using (var stream = new MemoryStream()) {
@@ -229,6 +203,7 @@ internal static class CoreTests
                 Throws<EndOfStreamException>(delegate { Framing.Read(stream); });
             }
         });
+        RunSectTests();
         Console.WriteLine(String.Format("RESULT: {0} passed, {1} failed", passed, failed));
         return failed == 0 ? 0 : 1;
     }

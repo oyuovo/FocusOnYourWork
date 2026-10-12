@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "专注岛 · 页面伙伴",
+  "name": "专注宗门 · 页面伙伴",
   "version": "0.1.0",
-  "description": "将你选择的 Edge 页面连接到本机专注岛。只在专注期间检查页面状态，不读取网页正文。",
+  "description": "将你选择的 Edge 页面连接到本机专注宗门。只在专注期间检查页面状态，不读取网页正文。",
   "permissions": ["tabs", "nativeMessaging"],
   "background": { "service_worker": "background.js" },
   "action": { "default_popup": "popup.html", "default_title": "选择专注页面" }

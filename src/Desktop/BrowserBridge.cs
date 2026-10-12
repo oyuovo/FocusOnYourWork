@@ -5,19 +5,20 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
 using System.Web.Script.Serialization;
-using FocusIsland.Core;
+using FocusOnYourWork.Core;
 
-namespace FocusIsland.Desktop
+namespace FocusOnYourWork.Desktop
 {
     public sealed class BrowserBridge : IDisposable
     {
         public static string PipeName { get { return "FocusIsland.v1." + WindowsIdentity.GetCurrent().User.Value; } }
         private readonly Func<BrowserMessage, BrowserReply> handler;
+        private readonly string pipeName;
         private volatile bool stopping;
         private NamedPipeServerStream pipe;
-        public BrowserBridge(Func<BrowserMessage, BrowserReply> handler)
+        public BrowserBridge(Func<BrowserMessage, BrowserReply> handler, string isolatedPipeName = null)
         {
-            this.handler = handler;
+            this.handler = handler; pipeName = isolatedPipeName ?? PipeName;
             new Thread(Loop) { IsBackground = true, Name = "Edge native bridge" }.Start();
         }
         private void Loop()
@@ -29,7 +30,7 @@ namespace FocusIsland.Desktop
                     var security = new PipeSecurity();
                     security.SetAccessRuleProtection(true, false);
                     security.AddAccessRule(new PipeAccessRule(WindowsIdentity.GetCurrent().User, PipeAccessRights.FullControl, AccessControlType.Allow));
-                    using (var server = new NamedPipeServerStream(PipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous, 4096, 4096, security))
+                    using (var server = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous, 4096, 4096, security))
                     {
                         pipe = server;
                         if (stopping) break;
